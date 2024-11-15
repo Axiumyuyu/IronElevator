@@ -10,6 +10,7 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
+import kotlin.math.max
 import kotlin.random.Random
 
 object UpdateElevator : CommandExecutor {
@@ -20,11 +21,22 @@ object UpdateElevator : CommandExecutor {
         if (p0 !is Player) return false
         if (p3 == null || p3.isEmpty()) return false
         val levels = p3[1].toIntOrNull() ?: 1
+        if (levels==0) return false
         var cost = 0
         if (p3[0].lowercase() == "height") {
             var height = p0.persistentDataContainer.get(MAX_TP_HEIGHT, PersistentDataType.INTEGER)!!
+            if (levels+height > 1280) {
+                p0.sendActionBar(text("你似乎在做一些没有意义的事情呢"))
+                return false
+            }
             for (i in 1..levels) {
-                cost += (height - DEFAULT_MAX_HEIGHT).div(2).toInt() + Random.nextInt(20)
+                if (height >= 512) {
+                    cost += (height - DEFAULT_MAX_HEIGHT).div(4).toInt() - Random.nextInt(30)
+                } else if (height >= 256) {
+                    cost += (height - DEFAULT_MAX_HEIGHT).div(3).toInt() - Random.nextInt(20)
+                } else {
+                    cost += max(1, (height - DEFAULT_MAX_HEIGHT).div(2).toInt() - Random.nextInt(10))
+                }
                 height++
             }
             if (xc.getPlayerData(p0.uniqueId).balance >= cost.toBigDecimal()) {
@@ -39,11 +51,11 @@ object UpdateElevator : CommandExecutor {
         } else if (p3[0].lowercase() == "cd") {
             var cd = p0.persistentDataContainer.get(IronElevator.CD, PersistentDataType.INTEGER)!!
             if (cd - levels <= 0) {
-                p0.sendActionBar(text("电梯冷却时间不能小于0"))
+                p0.sendActionBar(text("电梯冷却时间不能小于1"))
                 return false
             }
             for (i in 1..levels) {
-                cost += DEFAULT_CD - cd + Random.nextInt(20)
+                cost += DEFAULT_CD - cd + Random.nextInt(30) + 35
                 cd--
             }
             if (xc.getPlayerData(p0.uniqueId).balance >= cost.toBigDecimal()) {
