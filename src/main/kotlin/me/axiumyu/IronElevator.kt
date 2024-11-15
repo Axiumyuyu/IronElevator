@@ -44,6 +44,7 @@ class IronElevator : JavaPlugin(), Listener {
 
         const val DEFAULT_CD = 60
 
+        //允许的方块列表，传送到以下方块被认为是安全的
         @JvmField
         val ALLOW_BLOCKS: Set<Material> = setOf (
             Material.AIR,
@@ -93,6 +94,7 @@ class IronElevator : JavaPlugin(), Listener {
 
             )
 
+        //记录冷却
         @JvmField
         val CD_LIST = mutableMapOf<Player, Boolean>()
 
@@ -128,6 +130,7 @@ class IronElevator : JavaPlugin(), Listener {
             return
         }
 
+        //主体部分
         val minHeight = pl.world.minHeight
         val startY = pl.location.toBlockLocation().subY().y.toInt()
         pl.location.subY(MIN_TELEPORT_HEIGHT).run {
@@ -136,7 +139,7 @@ class IronElevator : JavaPlugin(), Listener {
                 if (result == 0) {
                     pl.teleport(subY())
                     pl.playSound(pl.getLocation(), TELEPORT_SOUND, 1f, 1f)
-                    CD_LIST[pl] = false
+                    CD_LIST[pl] = false     //false和true的效果应该是一样的
                     CleanCoolDown(pl).runTaskLater(this@IronElevator, coolDown * 20L)
                     return
                 } else {
@@ -160,6 +163,7 @@ class IronElevator : JavaPlugin(), Listener {
             return
         }
 
+        //主体部分
         val worldMaxY = pl.world.maxHeight
         val startY = pl.location.toBlockLocation().addY().y.toInt()
         pl.location.addY(MIN_TELEPORT_HEIGHT).run {
@@ -179,6 +183,10 @@ class IronElevator : JavaPlugin(), Listener {
     }
 }
 
+/**
+ * 将Location的Y减少或增加一个值
+ * @param d 需要减少或增加的高度，默认为1
+ */
 fun Location.subY(d: Int = 1): Location {
     return this.subtract(0.0, d.toDouble(), 0.0)
 }
@@ -187,6 +195,9 @@ fun Location.addY(d: Int = 1): Location {
     return this.add(0.0, d.toDouble(), 0.0)
 }
 
+/**
+ * @return 需要减少的高度，0则认为找到正确位置
+ */
 fun isValidDown(location: Location): Int {
     return if (location.block.getRelative(BlockFace.DOWN, 2).type == ELEVATOR_BLOCK) {
         if (checkBlock(location.block.getRelative(BlockFace.DOWN))) {
@@ -195,6 +206,9 @@ fun isValidDown(location: Location): Int {
     } else 1
 }
 
+/**
+ * @return 需要增加的高度，0则认为找到正确位置
+ */
 fun isValidUp(location: Location): Int {
     return if (location.block.type == ELEVATOR_BLOCK) {
         if (checkBlock(location.block.getRelative(BlockFace.UP))) {
@@ -203,16 +217,24 @@ fun isValidUp(location: Location): Int {
     } else 1
 }
 
+/**
+ * @return 是否为安全方块
+ */
 fun checkBlock(block: Block): Boolean {
     return (!block.isCollidable || ALLOW_BLOCKS.contains(block.type))
 }
-
+/**
+ *  @return 是否在方块边缘，如是则不传送
+ */
 fun onCorner(location: Location): Boolean {
     return (abs(location.x - location.x.toInt()) <= 0.2 || abs(location.z - location.z.toInt()) <= 0.2 || abs(
         location.x - location.x.toInt()
     ) >= 0.8 || abs(location.z - location.z.toInt()) >= 0.8 || abs(location.y - location.y.toInt()) > 0.5)
 }
 
+/**
+ * 去除冷却
+ */
 class CleanCoolDown(val pl: Player) : BukkitRunnable() {
     override fun run() {
         CD_LIST.remove(pl)

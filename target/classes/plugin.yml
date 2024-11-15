@@ -1,0 +1,11 @@
+name: IronElevator
+version: '1.0.0'
+main: me.axiumyu.IronElevator
+api-version: '1.21'
+libraries:
+  - 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
+commands:
+  elevator:
+    permission: ironelevator.elevator
+  elecheck:
+    permission: ironelevator.elecheck

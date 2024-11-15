@@ -29,16 +29,19 @@ object UpdateElevator : CommandExecutor {
                 p0.sendActionBar(text("你似乎在做一些没有意义的事情呢"))
                 return false
             }
-            for (i in 1..levels) {
-                if (height >= 512) {
-                    cost += (height - DEFAULT_MAX_HEIGHT).div(4).toInt() - Random.nextInt(30)
+
+            //金额计算公式
+            repeat(levels) {
+                cost += if (height >= 512) {
+                    (height - DEFAULT_MAX_HEIGHT).div(4).toInt() - Random.nextInt(30)
                 } else if (height >= 256) {
-                    cost += (height - DEFAULT_MAX_HEIGHT).div(3).toInt() - Random.nextInt(20)
+                    (height - DEFAULT_MAX_HEIGHT).div(3).toInt() - Random.nextInt(20)
                 } else {
-                    cost += max(1, (height - DEFAULT_MAX_HEIGHT).div(2).toInt() - Random.nextInt(10))
+                    max(1, (height - DEFAULT_MAX_HEIGHT).div(2).toInt() - Random.nextInt(10))
                 }
                 height++
             }
+
             if (xc.getPlayerData(p0.uniqueId).balance >= cost.toBigDecimal()) {
                 p0.persistentDataContainer.set(MAX_TP_HEIGHT, PersistentDataType.INTEGER, height)
                 xc.changePlayerBalance(p0.uniqueId, p0.name, cost.toBigDecimal(), false)
@@ -50,14 +53,17 @@ object UpdateElevator : CommandExecutor {
             }
         } else if (p3[0].lowercase() == "cd") {
             var cd = p0.persistentDataContainer.get(IronElevator.CD, PersistentDataType.INTEGER)!!
-            if (cd - levels <= 0) {
+            if (cd - levels < 1) {
                 p0.sendActionBar(text("电梯冷却时间不能小于1"))
                 return false
             }
-            for (i in 1..levels) {
+
+            //金额计算公式
+            repeat (levels) {
                 cost += DEFAULT_CD - cd + Random.nextInt(30) + 35
                 cd--
             }
+
             if (xc.getPlayerData(p0.uniqueId).balance >= cost.toBigDecimal()) {
                 p0.persistentDataContainer.set(IronElevator.CD, PersistentDataType.INTEGER, cd)
                 xc.changePlayerBalance(p0.uniqueId, p0.name, cost.toBigDecimal(), false)
