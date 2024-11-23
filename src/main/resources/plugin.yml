@@ -2,6 +2,8 @@ name: IronElevator
 version: '1.0.0'
 main: me.axiumyu.IronElevator
 api-version: '1.21'
+depend:
+  - XConomyAPI
 libraries:
   - 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
 commands:

@@ -23,6 +23,8 @@ object UpdateElevator : CommandExecutor {
         val levels = p3[1].toIntOrNull() ?: 1
         if (levels==0) return false
         var cost = 0
+
+        //主体部分
         if (p3[0].lowercase() == "height") {
             var height = p0.persistentDataContainer.get(MAX_TP_HEIGHT, PersistentDataType.INTEGER)!!
             if (levels+height > 1280) {
@@ -43,14 +45,15 @@ object UpdateElevator : CommandExecutor {
             }
 
             if (xc.getPlayerData(p0.uniqueId).balance >= cost.toBigDecimal()) {
-                p0.persistentDataContainer.set(MAX_TP_HEIGHT, PersistentDataType.INTEGER, height)
                 xc.changePlayerBalance(p0.uniqueId, p0.name, cost.toBigDecimal(), false)
+                p0.persistentDataContainer.set(MAX_TP_HEIGHT, PersistentDataType.INTEGER, height)
                 p0.sendActionBar(text("你的电梯高度升级到了$height 层,花费了$cost"))
                 return true
             } else {
                 p0.sendActionBar(text("你的余额不足，需要$cost"))
                 return false
             }
+
         } else if (p3[0].lowercase() == "cd") {
             var cd = p0.persistentDataContainer.get(IronElevator.CD, PersistentDataType.INTEGER)!!
             if (cd - levels < 1) {
